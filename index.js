@@ -130,8 +130,11 @@ app.get("/api", (req, res) => {
   res.send("WELCOME, you're one step closer to finding your dream job.");
 });
 
-app.get("/api/oh-my-god-its-working", (req, res) => {
-  res.send("OH MY GOD! Its Working.");
+app.get("/api/test1", (req, res) => {
+  res.json({
+    success: true,
+    message: "Test msg from server",
+  });
 });
 
 // Route for Login for User

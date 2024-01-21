@@ -130,6 +130,10 @@ app.get("/api", (req, res) => {
   res.send("WELCOME, you're one step closer to finding your dream job.");
 });
 
+app.get("/api/oh-my-god-its-working", (req, res) => {
+  res.send("OH MY GOD! Its Working.");
+});
+
 // Route for Login for User
 
 app.post("/api/login/user", async (req, res) => {

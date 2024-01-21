@@ -667,17 +667,43 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
     // Update the user's resume data
     if (skills !== undefined && Array.isArray(skills)) {
       // Filter out empty or incomplete skill entries
-      const filteredSkills = skills.filter((skill) => skill && typeof skill === "object" && skill.skillName && typeof skill.skillName === "string" && skill.skillName.trim() !== "" && skill.experience !== "");
+      const filteredSkills = skills.filter(
+        (skill) => skill && typeof skill === "object" && skill.skillName && typeof skill.skillName === "string" && skill.skillName.trim() !== "" && skill.experience !== ""
+      );
       user.resume.skills = filteredSkills;
     }
     if (education !== undefined && Array.isArray(education)) {
       // Filter out empty or incomplete skill entries
-      const filteredEducation = education.filter((edu) => edu && typeof edu === "object" && edu.course && typeof edu.course === "string" && edu.course.trim() !== "" && edu.duration !== "" && edu.university && typeof edu.university === "string" && edu.university.trim() !== "" && edu.courseType && typeof edu.courseType === "string" && edu.courseType.trim() !== "");
+      const filteredEducation = education.filter(
+        (edu) =>
+          edu &&
+          typeof edu === "object" &&
+          edu.course &&
+          typeof edu.course === "string" &&
+          edu.course.trim() !== "" &&
+          edu.duration !== "" &&
+          edu.university &&
+          typeof edu.university === "string" &&
+          edu.university.trim() !== "" &&
+          edu.courseType &&
+          typeof edu.courseType === "string" &&
+          edu.courseType.trim() !== ""
+      );
       user.resume.education = filteredEducation;
     }
     if (employment !== undefined && Array.isArray(employment)) {
       // Filter out empty or incomplete skill entries
-      const filteredEmployment = employment.filter((emp) => emp && typeof emp === "object" && emp.currentCompany && typeof emp.currentCompany === "string" && emp.currentCompany.trim() !== "" && emp.experience !== "" && emp.joiningDate !== null && emp.salary !== "");
+      const filteredEmployment = employment.filter(
+        (emp) =>
+          emp &&
+          typeof emp === "object" &&
+          emp.currentCompany &&
+          typeof emp.currentCompany === "string" &&
+          emp.currentCompany.trim() !== "" &&
+          emp.experience !== "" &&
+          emp.joiningDate !== null &&
+          emp.salary !== ""
+      );
       user.resume.employment = filteredEmployment;
       console.log(filteredEmployment);
     }
@@ -703,7 +729,17 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
 
     if (onlineProfiles !== undefined && Array.isArray(onlineProfiles)) {
       // Filter out empty or incomplete profile entries
-      const filteredProfiles = onlineProfiles.filter((profile) => profile && typeof profile === "object" && profile.websiteName && typeof profile.websiteName === "string" && profile.websiteName.trim() !== "" && profile.websiteLink && typeof profile.websiteLink === "string" && profile.websiteLink.trim() !== "");
+      const filteredProfiles = onlineProfiles.filter(
+        (profile) =>
+          profile &&
+          typeof profile === "object" &&
+          profile.websiteName &&
+          typeof profile.websiteName === "string" &&
+          profile.websiteName.trim() !== "" &&
+          profile.websiteLink &&
+          typeof profile.websiteLink === "string" &&
+          profile.websiteLink.trim() !== ""
+      );
       user.resume.onlineProfiles = filteredProfiles;
     }
 
@@ -951,3 +987,5 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+export default app;

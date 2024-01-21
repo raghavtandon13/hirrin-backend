@@ -137,6 +137,13 @@ app.get("/api/test1", (req, res) => {
     message: "Test msg from server",
   });
 });
+app.post("/api/test2", (req, res) => {
+  const data = req.body
+  res.json({
+    success: true,
+    message: data,
+  });
+});
 
 // Route for Login for User
 

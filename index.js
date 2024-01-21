@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 // app.use(cors({ credentials: true, origin: "http://34.131.250.17" }));
 // app.use(cors({ credentials: true, origin: "http://hirr.in" }));
-app.use(cors({ credentials: true, origin: ["http://hirr.in", "http://localhost:3000"] }));
+app.use(cors({ credentials: true, origin: ["http://hirr.in", "http://localhost:3000","https://job-portal-hirr-in.vercel.app"] }));
 // app.use(cors({ origin: "*" }));
 // app.use(cors());
 app.use(express.json());

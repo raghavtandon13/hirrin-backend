@@ -169,6 +169,9 @@ app.post("/api/login/user", async (req, res) => {
 
     res.cookie("mytoken", token, {
       expires: new Date(Date.now() + 3600000),
+      secure: true, // Set this if your application is served over HTTPS
+      httpOnly: true, // Recommended for security
+      domain: 'https://job-portal-hirr-in.vercel.app', // Set the domain to your frontend domain
       // httpOnly: true,
     });
 

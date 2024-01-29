@@ -25,7 +25,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 // app.use(cors({ credentials: true, origin: "http://34.131.250.17" }));
-app.use(cors({ credentials: true, origin: "http://hirr.in" }));
+// app.use(cors({ credentials: true, origin: "http://hirr.in" }));
+app.use(cors({ credentials: true, origin: ["http://hirr.in", "http://localhost:3000","https://hirrin.vercel.app"] }));
 // app.use(cors({ origin: "*" }));
 // app.use(cors());
 app.use(express.json());
@@ -135,6 +136,20 @@ app.get("/api", (req, res) => {
   res.send("WELCOME, you're one step closer to finding your dream job.");
 });
 
+app.get("/api/test1", (req, res) => {
+  res.json({
+    success: true,
+    message: "Test msg from server",
+  });
+});
+app.post("/api/test2", (req, res) => {
+  const data = req.body
+  res.json({
+    success: true,
+    message: data,
+  });
+});
+
 // Route for Login for User
 
 app.post("/api/login/user", async (req, res) => {
@@ -159,6 +174,9 @@ app.post("/api/login/user", async (req, res) => {
 
     res.cookie("mytoken", token, {
       expires: new Date(Date.now() + 3600000),
+      secure: true, // Set this if your application is served over HTTPS
+      httpOnly: true, // Recommended for security
+      domain: 'https://job-portal-hirr-in.vercel.app', // Set the domain to your frontend domain
       // httpOnly: true,
     });
 
@@ -169,7 +187,7 @@ app.post("/api/login/user", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        // token: token,
+        token: token,
         // Add other relevant user data
       },
     });

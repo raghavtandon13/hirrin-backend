@@ -2,7 +2,8 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User from "./models/User.js";
 
-const YOUR_CLIENT_ID = "705654658896-io99ql0f0nrjah3mn8k255g870opaq62.apps.googleusercontent.com";
+const YOUR_CLIENT_ID =
+  "705654658896-io99ql0f0nrjah3mn8k255g870opaq62.apps.googleusercontent.com";
 const YOUR_CLIENT_SECRET = "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";
 
 passport.use(
@@ -16,12 +17,14 @@ passport.use(
     async (mytoken, refreshToken, profile, done) => {
       let user = await User.findOne({ email: profile.emails[0].value });
       try {
-
         if (!user) {
           user = new User({
             name: profile.displayName,
             email: profile.emails[0].value,
-            profilePicture: profile.photos && profile.photos.length > 0 ? profile.photos[0].value : "",
+            profilePicture:
+              profile.photos && profile.photos.length > 0
+                ? profile.photos[0].value
+                : "",
             // Set other user properties as needed
           });
           await user.save();
@@ -32,8 +35,8 @@ passport.use(
       } catch (error) {
         return done(error);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {

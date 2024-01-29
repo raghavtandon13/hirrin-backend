@@ -38,7 +38,7 @@ app.use(
     secret: "your-secret-key",
     resave: true,
     saveUninitialized: true,
-  })
+  }),
 );
 
 app.use(passport.initialize());
@@ -80,7 +80,9 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error during authentication:", error);
-    res.status(500).json({ message: "An error occurred during authentication" });
+    res
+      .status(500)
+      .json({ message: "An error occurred during authentication" });
   }
 };
 //------------------------------------------------
@@ -106,13 +108,16 @@ const userAuthenticate = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error during authentication:", error);
-    res.status(500).json({ message: "An error occurred during authentication" });
+    res
+      .status(500)
+      .json({ message: "An error occurred during authentication" });
   }
 };
 //------------------------------------------------
 // MongoDB connection
 
-const MONGODB_URI = "mongodb+srv://tandonraghav13:1q2w3e4r5t@cluster0.iimfm2f.mongodb.net/?retryWrites=true&w=majority";
+const MONGODB_URI =
+  "mongodb+srv://tandonraghav13:1q2w3e4r5t@cluster0.iimfm2f.mongodb.net/?retryWrites=true&w=majority";
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -211,71 +216,84 @@ app.post("/api/login/company", async (req, res) => {
 
 // Route for Signup for User
 
-app.post("/api/signup/user", upload.single("profilePicture"), async (req, res) => {
-  try {
-    const { name, email, password, phone } = req.body;
-    let profilePicture = req.file ? req.file.filename : "";
-    profilePicture = `http://34.131.250.17/api/api/static/uploads/${profilePicture}`;
+app.post(
+  "/api/signup/user",
+  upload.single("profilePicture"),
+  async (req, res) => {
+    try {
+      const { name, email, password, phone } = req.body;
+      let profilePicture = req.file ? req.file.filename : "";
+      profilePicture = `http://34.131.250.17/api/api/static/uploads/${profilePicture}`;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email is already registered" });
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ message: "Email is already registered" });
+      }
+
+      const user = new User({ name, email, phone, password, profilePicture });
+      await user.save();
+
+      const token = jwt.sign({ userId: user._id }, "your-secret-key");
+      console.log(token);
+      res.cookie("mytoken", token, {
+        expires: new Date(Date.now() + 3600000),
+        httpOnly: true,
+        domain: ".34.131.250.17",
+        secure: true,
+        path: "/", // Set the path to the root of your application
+      });
+
+      res
+        .status(201)
+        .json({ message: "User created successfully", token: token });
+    } catch (error) {
+      console.error("Error during signup:", error);
+      res.status(500).json({ message: "An error occurred during signup" });
     }
-
-    const user = new User({ name, email, phone, password, profilePicture });
-    await user.save();
-
-    const token = jwt.sign({ userId: user._id }, "your-secret-key");
-    console.log(token);
-    res.cookie("mytoken", token, {
-      expires: new Date(Date.now() + 3600000),
-      httpOnly: true,
-      domain: ".34.131.250.17",
-      secure: true,
-      path: "/", // Set the path to the root of your application
-    });
-
-    res.status(201).json({ message: "User created successfully", token: token });
-  } catch (error) {
-    console.error("Error during signup:", error);
-    res.status(500).json({ message: "An error occurred during signup" });
-  }
-});
+  },
+);
 
 // Route for Signup for Organization
 
-app.post("/api/signup/company", upload.single("orgPicture"), async (req, res) => {
-  try {
-    const { companyName, industry, email, password } = req.body;
-    const orgPicture = req.file ? req.file.filename : "";
+app.post(
+  "/api/signup/company",
+  upload.single("orgPicture"),
+  async (req, res) => {
+    try {
+      const { companyName, industry, email, password } = req.body;
+      const orgPicture = req.file ? req.file.filename : "";
 
-    const existingCompany = await Company.findOne({ email });
-    if (existingCompany) {
-      return res.status(409).json({ message: "Email is already registered" });
+      const existingCompany = await Company.findOne({ email });
+      if (existingCompany) {
+        return res.status(409).json({ message: "Email is already registered" });
+      }
+
+      const company = new Company({
+        companyName,
+        industry,
+        email,
+        password,
+        orgPicture,
+      });
+      await company.save();
+
+      res.status(201).json({ message: "Company registered successfully" });
+    } catch (error) {
+      console.error("Error during company signup:", error);
+      res
+        .status(500)
+        .json({ message: "An error occurred during company signup" });
     }
-
-    const company = new Company({
-      companyName,
-      industry,
-      email,
-      password,
-      orgPicture,
-    });
-    await company.save();
-
-    res.status(201).json({ message: "Company registered successfully" });
-  } catch (error) {
-    console.error("Error during company signup:", error);
-    res.status(500).json({ message: "An error occurred during company signup" });
-  }
-});
+  },
+);
 
 // Route for posting jobs
 
 app.post("/api/jobs", authenticate, async (req, res) => {
   try {
     console.log("Request body:", req.body);
-    const { companyName, title, skills, experience, jobDescription, location } = req.body;
+    const { companyName, title, skills, experience, jobDescription, location } =
+      req.body;
 
     // const company = req.company;
     const company = await Company.findOne({ companyName });
@@ -333,7 +351,10 @@ app.get("/api/jobs/search", async (req, res) => {
       }
     }
 
-    const jobs = await Job.find(filter).sort(sortOptions).skip(skip).limit(resultsPerPage);
+    const jobs = await Job.find(filter)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(resultsPerPage);
 
     const totalResults = await Job.countDocuments(filter);
 
@@ -410,7 +431,9 @@ app.post("/api/jobs/:jobId/apply", userAuthenticate, async (req, res) => {
     res.json({ message: "Job application successful" });
   } catch (error) {
     console.error("Error during job application:", error);
-    res.status(500).json({ message: "An error occurred during job application" });
+    res
+      .status(500)
+      .json({ message: "An error occurred during job application" });
   }
 });
 
@@ -457,7 +480,9 @@ app.get("/api/user/applications", userAuthenticate, async (req, res) => {
     res.json(applications);
   } catch (error) {
     console.error("Error while fetching user applications:", error);
-    res.status(500).json({ message: "An error occurred while fetching user applications" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching user applications" });
   }
 });
 // Route for fetching saved jobs of user
@@ -471,7 +496,9 @@ app.get("/api/user/saved", userAuthenticate, async (req, res) => {
     res.json(saved);
   } catch (error) {
     console.error("Error while fetching user saved jobs:", error);
-    res.status(500).json({ message: "An error occurred while fetching user saved jobs" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching user saved jobs" });
   }
 });
 
@@ -490,13 +517,17 @@ app.get("/api/jobs/:jobId/applicants", authenticate, async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    const applicants = await User.find({ _id: { $in: job.applicants } }).select("_id name email profilePicture");
+    const applicants = await User.find({ _id: { $in: job.applicants } }).select(
+      "_id name email profilePicture",
+    );
     // console.log(applicants);
 
     res.json(applicants);
   } catch (error) {
     console.error("Error while fetching job applicants:", error);
-    res.status(500).json({ message: "An error occurred while fetching job applicants" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching job applicants" });
   }
 });
 
@@ -512,7 +543,9 @@ app.get("/api/company/jobs", authenticate, async (req, res) => {
     res.json({ jobs });
   } catch (error) {
     console.error("Error retrieving jobs:", error);
-    res.status(500).json({ message: "An error occurred while retrieving jobs" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while retrieving jobs" });
   }
 });
 
@@ -604,23 +637,30 @@ app.get("/api/jobs/:jobId/status", userAuthenticate, async (req, res) => {
 
 // Route for google auth
 
-app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
 
-app.get("/api/auth/google/callback", passport.authenticate("google", { failureRedirect: "/" }), (req, res) => {
-  const user = req.user;
-  const token = jwt.sign({ userId: user._id }, "your-secret-key");
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    const user = req.user;
+    const token = jwt.sign({ userId: user._id }, "your-secret-key");
 
-  if (req.user.profilePicture) {
-    user.profilePicture = req.user.profilePicture; // Assuming 'profilePicture' is the field name in your User schema
-    user.save();
-  }
-  res.cookie("mytoken", token);
-  console.log(token);
+    if (req.user.profilePicture) {
+      user.profilePicture = req.user.profilePicture; // Assuming 'profilePicture' is the field name in your User schema
+      user.save();
+    }
+    res.cookie("mytoken", token);
+    console.log(token);
 
-  // res.redirect("http://localhost:5173");
-  // res.redirect("http://34.131.250.17");
-  res.redirect("http://hirr.in");
-});
+    // res.redirect("http://localhost:5173");
+    // res.redirect("http://34.131.250.17");
+    res.redirect("http://hirr.in");
+  },
+);
 
 // Route for OTP login for user
 app.post("/api/otp-login", async (req, res) => {
@@ -661,14 +701,27 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
     const user = req.user;
 
     // Extract the resume data from the request body
-    const { skills, projects, onlineProfiles, resumeHeadline, education, employment } = req.body;
+    const {
+      skills,
+      projects,
+      onlineProfiles,
+      resumeHeadline,
+      education,
+      employment,
+    } = req.body;
     console.log(req.body);
 
     // Update the user's resume data
     if (skills !== undefined && Array.isArray(skills)) {
       // Filter out empty or incomplete skill entries
       const filteredSkills = skills.filter(
-        (skill) => skill && typeof skill === "object" && skill.skillName && typeof skill.skillName === "string" && skill.skillName.trim() !== "" && skill.experience !== ""
+        (skill) =>
+          skill &&
+          typeof skill === "object" &&
+          skill.skillName &&
+          typeof skill.skillName === "string" &&
+          skill.skillName.trim() !== "" &&
+          skill.experience !== "",
       );
       user.resume.skills = filteredSkills;
     }
@@ -687,7 +740,7 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
           edu.university.trim() !== "" &&
           edu.courseType &&
           typeof edu.courseType === "string" &&
-          edu.courseType.trim() !== ""
+          edu.courseType.trim() !== "",
       );
       user.resume.education = filteredEducation;
     }
@@ -702,7 +755,7 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
           emp.currentCompany.trim() !== "" &&
           emp.experience !== "" &&
           emp.joiningDate !== null &&
-          emp.salary !== ""
+          emp.salary !== "",
       );
       user.resume.employment = filteredEmployment;
       console.log(filteredEmployment);
@@ -713,10 +766,16 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
       const filteredProjects = projects
         .map((project) => ({
           title: (project.title || "").trim(),
-          duration: typeof project.duration === "string" ? project.duration.trim() : "", // Check and trim if it's a string
+          duration:
+            typeof project.duration === "string" ? project.duration.trim() : "", // Check and trim if it's a string
           details: (project.details || "").trim(),
         }))
-        .filter((project) => project.title !== "" && project.duration !== "" && project.details !== "");
+        .filter(
+          (project) =>
+            project.title !== "" &&
+            project.duration !== "" &&
+            project.details !== "",
+        );
 
       // Merge the filtered projects with existing projects
       user.resume.projects = [
@@ -738,7 +797,7 @@ app.post("/api/resume-update", userAuthenticate, async (req, res) => {
           profile.websiteName.trim() !== "" &&
           profile.websiteLink &&
           typeof profile.websiteLink === "string" &&
-          profile.websiteLink.trim() !== ""
+          profile.websiteLink.trim() !== "",
       );
       user.resume.onlineProfiles = filteredProfiles;
     }
@@ -773,7 +832,9 @@ app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
     // Register event handlers for parsing
     pdfParser.on("pdfParser_dataReady", (pdfData) => {
       // Access the parsed data
-      const pdfText = pdfData.formImage.Pages[0].Texts.map((text) => text.R[0].T).join(" ");
+      const pdfText = pdfData.formImage.Pages[0].Texts.map(
+        (text) => text.R[0].T,
+      ).join(" ");
 
       // Here, you can process the extracted text as needed
       res.json({ extractedText: pdfText });
@@ -784,7 +845,9 @@ app.post("/api/upload-pdf", upload.single("pdf"), async (req, res) => {
     pdfParser.parseBuffer(pdfData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "An error occurred while processing the PDF" });
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing the PDF" });
   }
 });
 
@@ -798,7 +861,9 @@ app.post("/api/prof-req", userAuthenticate, async (req, res) => {
     res.json({ message: "Prof req turned off" });
   } catch (error) {
     console.error("Error during job application:", error);
-    res.status(500).json({ message: "An error occurred during job application" });
+    res
+      .status(500)
+      .json({ message: "An error occurred during job application" });
   }
 });
 ///-----------------------------------------------------------------------
@@ -837,7 +902,9 @@ function calculateResumeCompletion(user) {
 }
 
 function sectionHasData(sectionData) {
-  return Object.values(sectionData).some((field) => field !== null && field !== undefined && field !== "");
+  return Object.values(sectionData).some(
+    (field) => field !== null && field !== undefined && field !== "",
+  );
 }
 
 app.get("/api/resume-completion", userAuthenticate, async (req, res) => {
@@ -851,33 +918,38 @@ app.get("/api/resume-completion", userAuthenticate, async (req, res) => {
   }
 });
 
-app.post("/api/change-profile-picture", upload.single("newProfilePicture"), userAuthenticate, async (req, res) => {
-  try {
-    const userId = req.user; // Assuming you have middleware to extract user ID from the token
+app.post(
+  "/api/change-profile-picture",
+  upload.single("newProfilePicture"),
+  userAuthenticate,
+  async (req, res) => {
+    try {
+      const userId = req.user; // Assuming you have middleware to extract user ID from the token
 
-    // Check if the user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      // Check if the user exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let newProfilePicture = req.file ? req.file.filename : "";
+      if (!newProfilePicture) {
+        return res.status(400).json({ message: "No profile picture provided" });
+      }
+
+      // Update the user's profile picture
+      user.profilePicture = `http://34.131.250.17/api/static/uploads/${newProfilePicture}`;
+      await user.save();
+
+      res.status(200).json({ message: "Profile picture changed successfully" });
+    } catch (error) {
+      console.error("Error changing profile picture:", error);
+      res.status(500).json({
+        message: "An error occurred while changing the profile picture",
+      });
     }
-
-    let newProfilePicture = req.file ? req.file.filename : "";
-    if (!newProfilePicture) {
-      return res.status(400).json({ message: "No profile picture provided" });
-    }
-
-    // Update the user's profile picture
-    user.profilePicture = `http://34.131.250.17/api/static/uploads/${newProfilePicture}`;
-    await user.save();
-
-    res.status(200).json({ message: "Profile picture changed successfully" });
-  } catch (error) {
-    console.error("Error changing profile picture:", error);
-    res.status(500).json({
-      message: "An error occurred while changing the profile picture",
-    });
-  }
-});
+  },
+);
 
 //Route for Company details (with org authentication)
 app.get("/api/company/details", authenticate, async (req, res) => {
@@ -901,7 +973,9 @@ app.get("/api/company/:company/details", async (req, res) => {
   const company = req.params.company;
   console.log(company);
   try {
-    const companyDetails = await Company.findOne({ _id: company }).select("-sessionToken");
+    const companyDetails = await Company.findOne({ _id: company }).select(
+      "-sessionToken",
+    );
 
     if (!companyDetails) {
       return res.status(404).json({ error: "Company not found" });
@@ -917,7 +991,15 @@ app.get("/api/company/:company/details", async (req, res) => {
 // Route for editing a job post
 app.post("/api/job/edit/", authenticate, async (req, res) => {
   const company = req.company;
-  const { jobId, companyName, title, skills, experience, jobDescription, location } = req.body;
+  const {
+    jobId,
+    companyName,
+    title,
+    skills,
+    experience,
+    jobDescription,
+    location,
+  } = req.body;
   try {
     const companyDetails = await Company.findOne({ _id: company._id });
     console.log("location recieved from req:", location);
@@ -960,7 +1042,9 @@ app.delete("/api/jobs/:jobId", authenticate, async (req, res) => {
 
     // Check if the job is in the company's jobs array
     if (!company.jobs.includes(job._id)) {
-      return res.status(403).json({ message: "Job does not belong to this company" });
+      return res
+        .status(403)
+        .json({ message: "Job does not belong to this company" });
     }
 
     // Remove the job from the company's jobs array

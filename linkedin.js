@@ -7,9 +7,9 @@ passport.use(
       clientID: LINKEDIN_CLIENT_ID,
       clientSecret: LINKEDIN_CLIENT_SECRET,
       callbackURL: "http://localhost:3000/auth/linkedin/callback",
-      scope: ["r_emailaddress", "r_liteprofile"], // Adjust scope as needed
+      scope: ["r_emailaddress", "r_liteprofile"],
     },
-    function (accessToken, refreshToken, profile, done) {
+    function (_accessToken, _refreshToken, profile, done) {
       return done(null, profile);
     },
   ),
@@ -20,7 +20,7 @@ app.get("/auth/linkedin", passport.authenticate("linkedin"));
 app.get(
   "/auth/linkedin/callback",
   passport.authenticate("linkedin", { failureRedirect: "/login" }),
-  function (req, res) {
+  function (_req, res) {
     res.redirect("/");
   },
 );
